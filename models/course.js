@@ -1,47 +1,39 @@
 'use strict';
-const {
-  Sequelize //Model
-} = require('sequelize');
+const Sequelize = require('sequelize');
 module.exports = (sequelize) => {
-  class Course extends Sequelize.Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-      Course.belongsTo(models.User, { foreignKey: "userId"});
-    }
-  };
-  Course.init({
+  const Course = sequelize.define('Course', {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
     title: {
       type: Sequelize.STRING,
       allowNull: false,
       validate: {
         notEmpty: {
-          msg: "Enter a valid title."
+          msg: 'Enter a valid title.'
         }
       }
     },
-    decription: {
+    description: {
       type: Sequelize.TEXT,
       allowNull: false,
       validate: {
         notEmpty: {
-          msg: "Enter a valid description."
+          msg: 'Enter a valid description.'
         }
       }
     },
     estimatedTime: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING
     },
     materialsNeeded: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING
     }
-  }, {
-    sequelize,
-    modelName: 'Course',
-  });
+  }, {});
+  Course.associate = function(models) {
+    Course.belongsTo(models.User, {foreignKey: "userId"});
+  };
   return Course;
 };
