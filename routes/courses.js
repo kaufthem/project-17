@@ -28,11 +28,22 @@ router.get('/courses/:id', asyncHelper(async (req, res) => {
 /* POST /api/courses 201 - Create Course */
 router.post('/courses', userAuthentication, asyncHelper(async (req, res, next) => {
   let course;
-  try {
-    course = await Course.create(req.body);
-    res.status(201).location(`/courses/${course.id}`).end();
-  } catch (err) {
-    next(err);
+  const errors = [];
+  if (!req.body.title) {
+    errors.push('Enter a valid title.');
+  }
+  if (!req.body.description) {
+    errors.push('Enter a vaild description.');
+  }
+  if (errors.length > 0) {
+    res.status(400).json({message: 'An error has occured.', errors: errors});
+  } else {
+    try {
+      course = await Course.create(req.body);
+      res.status(201).location(`/courses/${course.id}`).end();
+    } catch (err) {
+      next(err);
+    }
   }
 }));
 

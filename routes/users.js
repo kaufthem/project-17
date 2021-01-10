@@ -22,19 +22,35 @@ router.get('/users', userAuthentication, asyncHelper(async (req, res) => {
 
 /* POST /api/users 201 - Create Users */
 router.post('/users', asyncHelper(async (req, res, next) => {
-  try {
-    const user = await req.body;
-    if (user.password) {
-      user.password = bcryptjs.hashSync(user.password);
+  const errors = [];
+  if (!req.body.firstName) {
+    errors.push('Enter a valid first name.');
+  }
+  if (!req.body.lastName) {
+    errors.push('Enter a valid last name.');
+  }
+  if (!req.body.emailAddress) {
+    errors.push('Enter a valid email address.');
+  }
+  if (!req.body.password) {
+    errors.push('Enter a valid password.');
+  }
+  if (errors.length > 0) {
+    res.status(400).json({message: 'An error has occured.', errors: errors});
+  } else {
+    try {
+      const user = await req.body;
+      if (user.password) {
+        user.password = bcryptjs.hashSync(user.password);
+      }
+      await User.create(user);
+      res.status(201).location('/').end();
+    } catch (err) {
+      if (err.name === 'SequelizeValidationError') {
+        err.status = 400;   
+      }
+      next(err);
     }
-    await User.create(user);
-    res.status(201).location('/').end();
-  } catch (err) {
-    if (err.name === 'SequelizeValidationError') {
-      err.message = "Data is missing";
-      err.status = 400;   
-    }
-    next(err);
   }
 }));
 
